@@ -14,18 +14,6 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-      - name: Install Nintendo DS development libraries
-        shell: bash
-        run: |
-          set -euxo pipefail
-          CONF=/opt/devkitpro/pacman/etc/pacman.conf
-          # Use the downloads host documented for devkitPro package repositories.
-          # The pkg.devkitpro.org endpoint is returning HTTP 403 in GitHub Actions.
-          sed -i '/^\[dkp-libs\]/,/^\[/ s#^Server = .*#Server = https://downloads.devkitpro.org/packages#' "$CONF"
-          sed -i '/^\[dkp-linux\]/,/^\[/ s#^Server = .*#Server = https://downloads.devkitpro.org/packages/linux/$arch/#' "$CONF"
-          cat "$CONF"
-          dkp-pacman -Sy --noconfirm
-          dkp-pacman -S --noconfirm --needed nds-dev
       - name: Verify toolchain
         run: |
           test -x "$DEVKITARM/bin/arm-none-eabi-gcc"
