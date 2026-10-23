@@ -18,13 +18,13 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          echo "Configured devkitPro repositories:"
-          cat /opt/devkitpro/pacman/etc/pacman.conf || true
-          # Repair old container mirror URLs if present.
-          if [ -f /opt/devkitpro/pacman/etc/pacman.conf ]; then
-            sed -i 's#https://pkg.devkitpro.org/\$repo/\$arch#https://pkg.devkitpro.org/packages/\$repo/\$arch#g' /opt/devkitpro/pacman/etc/pacman.conf
-            sed -i 's#https://pkg.devkitpro.org/#https://pkg.devkitpro.org/packages/#g' /opt/devkitpro/pacman/etc/pacman.conf
-          fi
+          CONF=/opt/devkitpro/pacman/etc/pacman.conf
+          # Use the current package repository layout. Some versions of the
+          # container ship with the dkp-libs Server set to the package root,
+          # which makes pacman request database files from the wrong path.
+          sed -i '/^\[dkp-libs\]/,/^\[/ s#^Server = .*#Server = https://pkg.devkitpro.org/packages/$repo/$arch#' "$CONF"
+          sed -i '/^\[dkp-linux\]/,/^\[/ s#^Server = .*#Server = https://pkg.devkitpro.org/packages/linux/$arch#' "$CONF"
+          cat "$CONF"
           dkp-pacman -Sy --noconfirm
           dkp-pacman -S --noconfirm --needed nds-dev
       - name: Verify toolchain
