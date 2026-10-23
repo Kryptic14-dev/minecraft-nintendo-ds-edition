@@ -1,10 +1,10 @@
 # Texture Asset Plan
 
-This is the art handoff for the new-world-system branch. The game currently samples a 16-by-16 tile atlas: each tile is 16x16 pixels (a 256x256 atlas). Before drawing the final atlas, keep each requested tile as an individual 16x16 PNG so it can be packed into the project's actual atlas without overwriting existing tiles. The existing atlas layout must be checked before assigning final coordinates.
+This is the art handoff for the new-world-system branch. The game currently samples a 8-by-8 tile atlas: each tile is 8x8 pixels (the atlas dimensions must be confirmed from the source assets). Before drawing the final atlas, keep each requested tile as an individual 8x8 PNG so it can be packed into the project's actual atlas without overwriting existing tiles. The existing atlas layout must be checked before assigning final coordinates.
 
 ## Art rules
 
-- Base tile: **16x16 pixels**, pixel art, crisp edges, no smoothing.
+- Base tile: **8x8 pixels**, pixel art, crisp edges, no smoothing.
 - Make each texture tileable on all edges unless the entry says otherwise.
 - Keep transparent pixels genuinely transparent for glass; don't paint a checkerboard background.
 - For glass, use a subtle tint, thin bright edge highlights, and very little opaque fill. Avoid relying on alpha alone: the DS renderer may need an opaque/tinted fallback.
@@ -14,7 +14,7 @@ This is the art handoff for the new-world-system branch. The game currently samp
 
 ## Priority 1 — glass
 
-Make these 17 individual 16x16 tiles:
+Make these 17 individual 8x8 tiles:
 
 - [ ] `glass_clear.png` — clear glass face, faint cool tint and edge highlight.
 - [ ] `glass_white.png`
@@ -94,7 +94,7 @@ Please don't pack tiles into arbitrary atlas positions yet. The game maps block 
 
 ## Priority 4 — food, farming, and item icons
 
-These are **inventory/item icons**, not block-face textures. Draw each as a centered 16x16 pixel-art PNG with transparent background. The names are proposed source filenames; they still need to be connected to the game's item/inventory code.
+These are **inventory/item icons**, not block-face textures. Draw each as a centered 8x8 pixel-art PNG with transparent background. The names are proposed source filenames; they still need to be connected to the game's item/inventory code.
 
 ### Starter food loop
 
