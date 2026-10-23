@@ -1,41 +1,48 @@
-# Texture audit and remaining art gaps
+# Texture audit and remaining implementation gaps
 
 Branch: `new-world-system`
 
-## What the source already has
+## User-provided texture ZIP checked
 
-The repository already includes a substantial legacy JoliCraft pack under `dscraft/packs/jolicraft/`. Reuse those assets where their format and renderer support match instead of redrawing duplicates.
+Inspected `MCDS Textures(1).zip`: it contains 177 PNG files. The ZIP includes glass, leather armor, colored wool, many 8×8 block tiles, food/drop icons, tool icons, and crafting-table/furnace face textures. **Do not ask for or list glass or leather armor textures as missing.** The remaining work is to integrate these assets into the game and confirm each is compatible with its renderer.
 
-- **Environment:** `environment/clouds.png`, `environment/rain.png`, `environment/snow.png`; `misc/water.png`, `misc/watercolor.png`, `custom_water_still.png`; sun/moon are loaded by `source/game/environment.c` from the runtime `misc/` and `textures/` paths.
-- **GUI:** existing `gui/background.png`, `gui/container.png`, `gui/crafting.png`, `gui/furnace.png`, `gui/inventory.png`, `gui/icons.png`, `gui/items.png`, `gui/slot.png`, `gui/gui.png`.
-- **Mobs:** existing texture candidates for chicken, cow, creeper, pig, sheep, skeleton, spider, and other legacy mobs under `mob/`.
-- **Armor:** existing `armor/cloth_1.png` and `armor/cloth_2.png` are the legacy cloth/leather armor sheets; chain, iron, gold and diamond armor sheets are also present. Preserve the old filenames where the current loader expects them. Do not assume the model UVs match a newly named file without checking the armor renderer.
-- **Existing terrain/block texture mapping:** `source/game/blocks.c` maps block IDs to coordinates in the current atlas. Most entries after the original block set are placeholders or repeated coordinates; new assets must be packed into the atlas and mapped to IDs, not merely copied into the pack folder.
+### Confirmed useful files in the ZIP
 
-## Leather armor requirement
+- **Glass:** `glass.png` (8×8).
+- **Leather armor:** `leather_helmet.png`, `leather_helmet_overlay.png`, `leather_chestplate.png`, `leather_leggings.png`, `leather_leggings_overlay.png`, `leather_boots.png`, `leather_boots_overlay.png`; `leather.png` item/drop icon. These are 8×8 files in the ZIP. Verify whether these are intended as item icons or model skin/UV textures before connecting them to worn armor rendering.
+- **Wool:** white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red and black wool tiles (8×8).
+- **Blocks/ores:** bedrock, coal ore, iron ore, gold ore, redstone ore, diamond ore, lapis ore, gravel, sand, sandstone and its top/bottom, cobblestone, mossy cobblestone, dirt, grass, grass-block side/overlay, stone, plus several utility blocks.
+- **Food/drops:** apple, beef, porkchop, chicken, cooked chicken, cooked porkchop, cod/cooked cod, bread, golden apple, mushroom stew, wheat, wheat seeds, egg, feather, bone, string, rotten flesh and leather.
+- **Tools/armor items:** wooden, stone, iron, gold and diamond tool icons, plus leather/iron/gold/diamond armor item icons.
+- **Block faces:** crafting table front/side/top and furnace front/front-on/side/top.
+- **Larger interface or block sheets:** e.g. `icons.png`, `widgets.png`, `tabs.png`, `tab_inventory.png`, `tab_items.png`, `tab_item_search.png`, `stats_icons.png`, and 256×256 crafting/furnace/anvil/enchanting-table images. These are not individual 8×8 tiles and should be used only where the corresponding UI/rendering code expects a full sheet.
 
-Treat the legacy cloth armor set as **leather armor** in the survival item system. Add four wearable equipment slots/items—leather helmet, chestplate, leggings, and boots—with the correct armor points and durability for the Java 1.1-era rules. Reuse `armor/cloth_1.png` and `armor/cloth_2.png` only if the current armor UV mapping confirms those are the intended two-layer sheets. Leather item/inventory icons are a separate requirement if the current GUI cannot crop suitable icons from an existing item atlas.
+## What may still be missing
 
-The current code audit did not find a standalone `source/game/armor.c`; armor behavior must be added to the existing player/inventory/equipment code after locating those definitions. This report does not claim leather armor gameplay is implemented yet.
+### Block tiles / environment
+- The ZIP's glass and wool tiles are present, but **16 separate stained-glass block textures are not evident** from the filenames; only `glass.png` is present. If stained glass is required as separate colors, add those tiles or implement tinting if the renderer supports it.
+- The requested five wood families still need checking: oak/spruce/birch/jungle/acacia log sides, log ends and planks. Those filenames were not evident in the ZIP listing.
+- Confirm all needed terrain tiles and map them to block IDs: some useful tiles are present, but do not assume every requested block face has a matching texture.
+- Leaves for each wood type, cactus/reeds/tall grass/flowers/mushrooms/torch/ladder/rails/doors/trapdoors/fences may still be needed depending on which blocks are implemented.
+- Water/lava/fire textures should be checked against the existing runtime assets before drawing replacements.
 
-## Still needed or needs verification
+### Food, farming, and mob art
+- Many food and drop icons are present. Check whether raw fish variants, cooked beef/steak naming, and every item required by the chosen Java 1.1-era feature set have matching assets.
+- The ZIP has sweet berry bush stages, which are modern art and not a Java 1.1 feature; don't implement berries just because the files exist unless requested.
+- Wheat crop growth stages 0–7 were not evident by filename. Add them only if the crop renderer requires separate stage textures.
+- The repository's legacy pack already has mob texture candidates for pig, cow, chicken, sheep, zombie, skeleton, spider and creeper. Inspect model UV dimensions before requesting or integrating replacement mob sheets.
 
-### High priority for the requested world/survival milestone
-- **New block atlas tiles, all 8×8 PNGs:** clear glass + 16 stained-glass colours; oak/spruce/birch/jungle/acacia log side, log end and planks (15 tiles); bedrock, coal/iron/gold/redstone/diamond/lapis ores, gravel, sand, sandstone, cobblestone, mossy cobblestone, dirt, grass top/side, stone.
-- **Food and drop icons:** apple, bread, raw/cooked pork, raw/cooked beef/steak, raw/cooked chicken, raw/cooked fish, mushroom stew, seeds, wheat, egg, leather drop, feather, wool, bone, string and rotten flesh. Check the existing `gui/items.png` atlas before drawing replacements.
-- **Survival HUD:** hearts, hunger icons, hotbar/selection and optional armor icons, unless the existing `gui/` atlas already contains usable equivalents.
-- **Crafting/containers:** crafting table, furnace and chest block faces if the new block atlas doesn't already provide them; existing GUI panels can likely be reused.
-- **Farming world sprites:** wheat crop growth stages only if the renderer draws crops as sprites rather than block cubes.
-- **Mob texture compatibility:** the pack has candidate mob textures, so don't draw replacements yet. Confirm each mesh's UV layout and the expected dimensions first.
+### HUD and menus
+- The ZIP includes several larger GUI sheets, but dedicated heart/hunger/hotbar/armor sprites were not obvious as standalone filenames. Inspect the existing interface atlas and current sprite mapping first; only draw missing sprites after confirming the atlas does not already provide them.
+- World creation/list/delete UI icons are optional until the world menu code is in place.
 
-### Optional / only if the renderer actually needs them
-- Separate glass-pane texture: likely unnecessary if thin panes use the glass tile.
-- New sky/cloud/rain/snow art: existing assets are present; verify runtime paths and formats first.
-- Extra menu button/world icons: reuse the existing GUI assets where possible.
+## Leather armor implementation requirement
 
-## Important format and integration notes
+Use the provided leather armor assets; do not request new leather armor art. Implement four wearable items (helmet, chestplate, leggings, boots), armor slots, protection, durability, equip/unequip behavior, and saving/loading. Check the current player/inventory structures and existing renderer UV mapping before choosing whether the ZIP's 8×8 armor images are item icons only or can be used as worn armor textures. The presence of art does **not** mean the gameplay code is already implemented.
 
-- Block/item artwork requested for the new system should be **8×8 pixels** per tile. Existing legacy pack files are various sizes and are not automatically compatible with the 8×8 block atlas.
-- The runtime loads PCX files in several places while the pack contains PNGs. Confirm conversion/loading paths before assuming a PNG will be read directly.
-- Do not replace the existing atlas wholesale or assign arbitrary UV coordinates. Update the atlas-generation/load pipeline and `source/game/blocks.c` together, then verify on a DS emulator.
-- The user's separate texture ZIP was not available as an accessible attachment during this inspection. This audit covers files visible in the GitHub repository; once the ZIP is accessible, compare its filenames and dimensions against this report before declaring any texture missing.
+## Integration notes
+
+- The intended block/item tile size is **8×8 pixels**. The ZIP contains 177 PNGs of mixed sizes: most named block/item tiles are 8×8, while some GUI sheets and armor color/skin files are larger. Keep these formats distinct.
+- The source's block renderer maps block IDs to coordinates in an atlas (see `source/game/blocks.c`). Copying PNGs into the repository alone will not make them appear in game; atlas loading/packing and block ID/UV mapping must be updated together.
+- Some runtime paths use PCX textures and custom texture loading. Verify the asset conversion and runtime path requirements rather than assuming every PNG can be opened directly.
+- This audit covers the provided ZIP plus files visible in the repository. It does not claim that these assets have already been integrated or that leather armor gameplay is complete.
