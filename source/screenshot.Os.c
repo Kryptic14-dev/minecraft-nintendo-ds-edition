@@ -2,6 +2,7 @@
 #include "common/bmp.h"
 
 void wait();
+void D3D_SaveScreen(const char* filename, u16* buffer);
 int scrnum;
 
 
@@ -56,7 +57,7 @@ void screenshotbmp(const char* filename, u16* vram)
 	// REG_DISPCAPCNT=DCAP_BANK(3)|DCAP_ENABLE|DCAP_SIZE(3);
 	// while(REG_DISPCAPCNT & DCAP_ENABLE);
 
-	u8* temp=(u8*)malloc(256*192*3+sizeof(INFOHEADER)+sizeof(HEADER));
+	u8* temp=(u8*)malloc(256*384*3+sizeof(INFOHEADER)+sizeof(HEADER));
 
 	HEADER* header=(HEADER*)temp;
 	INFOHEADER* infoheader=(INFOHEADER*)(temp+sizeof(HEADER));
