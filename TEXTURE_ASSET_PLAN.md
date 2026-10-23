@@ -90,3 +90,49 @@ Only make these after the first glass/wood integration is underway:
 ## Important integration note
 
 Please don't pack tiles into arbitrary atlas positions yet. The game maps block IDs to atlas coordinates in `source/game/blocks.c`, and texture UVs are generated from that atlas. We need to reserve free coordinates and map each new block to the correct tile before the art can appear in-game. The first implementation should prioritize clear glass plus the 16 stained-glass tiles and the five wood families.
+
+
+## Priority 4 — food, farming, and item icons
+
+These are **inventory/item icons**, not block-face textures. Draw each as a centered 16x16 pixel-art PNG with transparent background. The names are proposed source filenames; they still need to be connected to the game's item/inventory code.
+
+### Starter food loop
+
+- [ ] `food_apple.png` — apple.
+- [ ] `food_bread.png` — loaf of bread.
+- [ ] `food_raw_porkchop.png` — raw porkchop.
+- [ ] `food_cooked_porkchop.png` — cooked porkchop.
+- [ ] `food_raw_beef.png` — raw beef.
+- [ ] `food_steak.png` — cooked beef/steak.
+- [ ] `food_raw_chicken.png` — raw chicken.
+- [ ] `food_cooked_chicken.png` — cooked chicken.
+- [ ] `food_raw_fish.png` — raw fish.
+- [ ] `food_cooked_fish.png` — cooked fish.
+- [ ] `food_mushroom_stew.png` — stew in a bowl.
+- [ ] `food_golden_apple.png` — optional rare food.
+
+### Farming and animal drops
+
+- [ ] `item_wheat_seeds.png` — wheat seeds.
+- [ ] `item_wheat.png` — harvested wheat.
+- [ ] `crop_wheat_stage_0.png` through `crop_wheat_stage_7.png` — 8 tiny crop growth stages, if crops are rendered as world sprites.
+- [ ] `item_egg.png` — chicken egg.
+- [ ] `item_leather.png` — leather drop.
+- [ ] `item_feather.png` — feather drop.
+- [ ] `item_wool_white.png` — wool drop/item icon (colored wool variants can reuse the 16 wool color set above).
+- [ ] `item_bone.png` — skeleton drop.
+- [ ] `item_string.png` — spider drop.
+- [ ] `item_rotten_flesh.png` — zombie drop.
+
+For a first playable survival build, prioritize the ten basic foods (apple, bread, raw/cooked pork, raw/cooked beef, raw/cooked chicken, raw/cooked fish) plus wheat/seeds and egg. Other drops can follow.
+
+## Priority 5 — mob art
+
+**Do not draw full mob sheets yet.** Unlike block tiles and item icons, mob textures must match the model UV layout and the animation/mesh code in this project. A nicely drawn texture with the wrong UV layout will appear scrambled in-game. First-pass mob list, ordered for a low-population DS build:
+
+1. Passive animals: `mob_pig`, `mob_cow`, `mob_chicken`, `mob_sheep`.
+2. Hostile mobs: `mob_zombie`, `mob_skeleton`, `mob_spider`, `mob_creeper`.
+
+Target mob features: idle/walk animations; animals wander and flee; zombies pursue the player; skeletons use a simple ranged attack only if the existing combat code supports it; spiders pursue and jump only if performance allows; creepers approach and explode only if a safe, low-cost behavior can be implemented. Keep spawn counts low and configurable.
+
+Before making these textures, we'll inspect the existing model dimensions and UVs and give you exact canvas sizes and filename conventions for each mob. For now, you can make concept sprites, but don't commit final-sized mob sheets yet.
