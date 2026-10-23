@@ -1,6 +1,6 @@
 # World and Building-Block Requirements
 
-This document records the gameplay rules for the new-world implementation. It is a target specification, not a claim that every feature is already implemented.
+This document records the gameplay requirements for the new-world implementation. It is a target specification, not a claim that every feature is already implemented.
 
 ## World coordinates
 
@@ -11,14 +11,14 @@ This document records the gameplay rules for the new-world implementation. It is
 - World metadata must record the seed and generation version so a saved world can be reopened consistently.
 - World creation, listing, loading, saving, and error handling must be verified against the Nintendo DS filesystem and existing map renderer before replacing the legacy world format.
 
-## Colored blocks
+## Colored blocks and panes
 
 The target palette contains the 16 classic dye colors: white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, and black.
 
-Provide all 16 colors for **wool**, **beds**, and **stained glass**, in addition to clear glass. Beds should behave as placeable two-block structures rather than ordinary single cubes, and glass should use a transparent rendering path if the existing DS renderer can support it within its memory budget.
+Provide all 16 colors for **wool**, **beds**, **stained glass**, and **stained glass panes**, plus **clear glass** and **clear glass panes**. Panes should be thin, connect visually to neighboring panes and glass blocks where practical, and use a lower-profile collision shape than full blocks. Beds should behave as placeable two-block structures rather than ordinary single cubes. Glass and panes should use transparent rendering if the existing DS renderer can support it within its memory budget.
 
 ## Compatibility and implementation notes
 
 - Preserve support for existing legacy .world files where practical; do not silently overwrite or reinterpret them as the new format.
-- Keep the renderer's current block-ID and texture-atlas limits in mind. Adding palette entries requires coordinated block definitions, texture mapping, interaction/drop rules, and save compatibility—not just adding names to a list.
+- Keep the renderer's current block-ID and texture-atlas limits in mind. Adding palette entries requires coordinated block definitions, texture mapping, interaction/drop rules, collision/rendering behavior, and save compatibility—not just adding names to a list.
 - Validate generated worlds on emulator software, including the world-list screen, terrain rendering, player collision, saving, and reopening.
