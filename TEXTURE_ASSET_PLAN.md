@@ -14,7 +14,7 @@ This is the art handoff for the new-world-system branch. The game currently samp
 
 ## Priority 1 — glass
 
-Make these 18 individual 16x16 tiles:
+Make these 17 individual 16x16 tiles:
 
 - [ ] `glass_clear.png` — clear glass face, faint cool tint and edge highlight.
 - [ ] `glass_white.png`
