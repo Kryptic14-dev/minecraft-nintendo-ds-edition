@@ -30,7 +30,9 @@ jobs:
         run: |
           test -x "$DEVKITARM/bin/arm-none-eabi-gcc"
           test -f "$DEVKITARM/ds_rules"
-          arm-none-eabi-gcc --version
+          echo "$DEVKITARM/bin" >> "$GITHUB_PATH"
+          echo "$DEVKITPRO/tools/bin" >> "$GITHUB_PATH"
+          "$DEVKITARM/bin/arm-none-eabi-gcc" --version
       - name: Build ROM
         run: make
       - name: Verify ROM output
