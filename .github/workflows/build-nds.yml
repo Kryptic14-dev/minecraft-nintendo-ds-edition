@@ -12,14 +12,31 @@ jobs:
     container:
       image: devkitpro/devkitarm:latest
     steps:
-      - name: Install Nintendo DS development libraries
-        run: |
-          dkp-pacman -Sy --noconfirm
-          dkp-pacman -S --noconfirm nds-dev
       - name: Check out source
         uses: actions/checkout@v4
+      - name: Install Nintendo DS development libraries
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Configured devkitPro repositories:"
+          cat /opt/devkitpro/pacman/etc/pacman.conf || true
+          # Repair old container mirror URLs if present.
+          if [ -f /opt/devkitpro/pacman/etc/pacman.conf ]; then
+            sed -i 's#https://pkg.devkitpro.org/\$repo/\$arch#https://pkg.devkitpro.org/packages/\$repo/\$arch#g' /opt/devkitpro/pacman/etc/pacman.conf
+            sed -i 's#https://pkg.devkitpro.org/#https://pkg.devkitpro.org/packages/#g' /opt/devkitpro/pacman/etc/pacman.conf
+          fi
+          dkp-pacman -Sy --noconfirm
+          dkp-pacman -S --noconfirm --needed nds-dev
+      - name: Verify toolchain
+        run: |
+          test -x "$DEVKITARM/bin/arm-none-eabi-gcc"
+          test -f "$DEVKITARM/ds_rules"
+          arm-none-eabi-gcc --version
       - name: Build ROM
         run: make
+      - name: Verify ROM output
+        run: |
+          find . -maxdepth 1 -name '*.nds' -type f -size +0c -print -quit | grep .
       - name: Upload .nds ROM
         uses: actions/upload-artifact@v4
         with:
