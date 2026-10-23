@@ -11,6 +11,10 @@ This document records the gameplay requirements for the new-world implementation
 - World metadata must record the seed and generation version so a saved world can be reopened consistently.
 - World creation, listing, loading, saving, and error handling must be verified against the Nintendo DS filesystem and existing map renderer before replacing the legacy world format.
 
+## Wood types
+
+Include five distinct wood types, each with matching log and plank appearances and appropriate block textures: oak, spruce, birch, jungle, and acacia. Where the original texture atlas or block-ID limits prevent all variants at once, extend the mapping and save compatibility deliberately rather than aliasing different woods to the same block.
+
 ## Colored blocks and panes
 
 The target palette contains the 16 classic dye colors: white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, and black.
