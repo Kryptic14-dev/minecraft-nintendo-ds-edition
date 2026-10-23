@@ -306,99 +306,98 @@ void Menu_StartGame(API_Entity* e)
 	DS_ChangeState(&Game_State);
 }
 
-void listFiles(char* path, filelist_struct* l, API_Entity* father, API_function function, u8 mode) //0 files, 1 both, 2 dir
+static bool listEntryAccepted(const char* directory, const char* name, u8 mode, struct stat* st)
+{
+	char fullPath[512];
+	if(!name || (name[0]=='.' && (name[1]=='\\0' || (name[1]=='.' && name[2]=='\\0'))))
+		return false;
+	if(snprintf(fullPath, sizeof(fullPath), "%s/%s", directory, name) >= sizeof(fullPath))
+		return false;
+	if(stat(fullPath, st) != 0)
+		return false;
+	return ((S_ISDIR(st->st_mode) && mode) || !mode || (!S_ISDIR(st->st_mode) && mode==1));
+}
+
+void listFiles(char* path, filelist_struct* l, API_Entity* father, API_function function, u8 mode)
 {
 	char str[255];
-	l->list=NULL;
-	l->count=0;
 	DIR *dir;
 	struct dirent *ent;
 	struct stat st;
-	
+	l->list=NULL;
+	l->count=0;
+
 	#ifndef FATONLY
-		sprintf(str,"nitro:/%s/%s",ROOT,path);
+		snprintf(str, sizeof(str), "nitro:/%s/%s", ROOT, path);
+		dir=opendir(str);
+		if(dir)
+		{
+			while((ent=readdir(dir)))
+				if(listEntryAccepted(str, ent->d_name, mode, &st)) l->count++;
+			closedir(dir);
+		}
+	#endif
+
+	#ifdef FATONLY
+		snprintf(str, sizeof(str), "%s", path);
+	#else
+		snprintf(str, sizeof(str), "%s/%s/%s", basePath, ROOT, path);
+	#endif
+	dir=opendir(str);
+	if(dir)
+	{
+		while((ent=readdir(dir)))
+			if(listEntryAccepted(str, ent->d_name, mode, &st)) l->count++;
+		closedir(dir);
+	}
+
+	if(l->count == 0) return;
+	l->list=calloc(l->count, sizeof(listFile_struct));
+	if(!l->list) { l->count=0; return; }
+	l->count=0;
+
+	#ifndef FATONLY
+		snprintf(str, sizeof(str), "nitro:/%s/%s", ROOT, path);
 		dir=opendir(str);
 		if(dir)
 		{
 			while((ent=readdir(dir)))
 			{
-				stat(ent->d_name,&st);
-				if(((S_ISDIR(st.st_mode) && mode) || !mode || (!S_ISDIR(st.st_mode) && mode==1))
-				&& !(strlen(ent->d_name)==1 && ent->d_name[0]=='.')
-				&& !(strlen(ent->d_name)==2 && ent->d_name[0]=='.' && ent->d_name[1]=='.'))l->count++;
+				if(!listEntryAccepted(str, ent->d_name, mode, &st)) continue;
+				l->list[l->count].filename=malloc(strlen(ent->d_name)+1);
+				if(!l->list[l->count].filename) continue;
+				strcpy(l->list[l->count].filename, ent->d_name);
+				l->list[l->count].isDir=S_ISDIR(st.st_mode);
+				l->list[l->count].nitro=true;
+				l->list[l->count].button=API_CreateButtonFather(128-strlen(ent->d_name)*4, 32+20*l->count, RGB15(31,31,31), function, father, ent->d_name, "button.pcx", false);
+				l->count++;
 			}
 			closedir(dir);
 		}
 	#endif
+
 	#ifdef FATONLY
-		sprintf(str,"%s",path);
+		snprintf(str, sizeof(str), "%s", path);
 	#else
-		sprintf(str,"%s/%s/%s",basePath,ROOT,path);
+		snprintf(str, sizeof(str), "%s/%s/%s", basePath, ROOT, path);
 	#endif
 	dir=opendir(str);
 	if(dir)
 	{
 		while((ent=readdir(dir)))
 		{
-			stat(ent->d_name,&st);
-			if(((S_ISDIR(st.st_mode) && mode) || !mode || (!S_ISDIR(st.st_mode) && mode==1))
-			&& !(strlen(ent->d_name)==1 && ent->d_name[0]=='.')
-			&& !(strlen(ent->d_name)==2 && ent->d_name[0]=='.' && ent->d_name[1]=='.'))l->count++;
-		}
-		closedir(dir);
-	}
-	
-	l->list=malloc(sizeof(listFile_struct)*l->count);
-	if(l->list)
-	{
-		l->count=0;
-		
-		#ifndef FATONLY
-			sprintf(str,"nitro:/%s/%s",ROOT,path);
-			dir=opendir(str);
-			while((ent=readdir(dir)))
-			{
-				stat(ent->d_name,&st);
-				if(((S_ISDIR(st.st_mode) && mode) || !mode || (!S_ISDIR(st.st_mode) && mode==1))
-				&& !(strlen(ent->d_name)==1 && ent->d_name[0]=='.')
-				&& !(strlen(ent->d_name)==2 && ent->d_name[0]=='.' && ent->d_name[1]=='.'))
-				{
-					l->list[l->count].filename=malloc(strlen(ent->d_name)+1);
-					strcpy(l->list[l->count].filename,ent->d_name);
-					l->list[l->count].isDir=S_ISDIR(st.st_mode);
-					l->list[l->count].nitro=true;
-					l->list[l->count].button=API_CreateButtonFather(128-strlen(l->list[l->count].filename)*4, 32+20*l->count, RGB15(31,31,31), function, father, l->list[l->count].filename, "button.pcx", false);
-					l->count++;
-				}
-			}
-			closedir(dir);
-		#endif
-		
-		#ifdef FATONLY
-			sprintf(str,"%s",path);
-		#else
-			sprintf(str,"%s/%s/%s",basePath,ROOT,path);
-		#endif
-		dir=opendir(str);
-		while((ent=readdir(dir)))
-		{
-			stat(ent->d_name,&st);
-			if(((S_ISDIR(st.st_mode) && mode) || !mode || (!S_ISDIR(st.st_mode) && mode==1))
-			&& !(strlen(ent->d_name)==1 && ent->d_name[0]=='.')
-			&& !(strlen(ent->d_name)==2 && ent->d_name[0]=='.' && ent->d_name[1]=='.'))
-			{
-				l->list[l->count].filename=malloc(strlen(ent->d_name)+1);
-				strcpy(l->list[l->count].filename,ent->d_name);
-				l->list[l->count].isDir=S_ISDIR(st.st_mode);
-				l->list[l->count].nitro=false;
-				l->list[l->count].button=API_CreateButtonFather(128-strlen(l->list[l->count].filename)*4, 32+20*l->count, RGB15(31,31,31), function, father, l->list[l->count].filename, "button.pcx", false);
-				l->count++;
-			}
+			if(!listEntryAccepted(str, ent->d_name, mode, &st)) continue;
+			l->list[l->count].filename=malloc(strlen(ent->d_name)+1);
+			if(!l->list[l->count].filename) continue;
+			strcpy(l->list[l->count].filename, ent->d_name);
+			l->list[l->count].isDir=S_ISDIR(st.st_mode);
+			l->list[l->count].nitro=false;
+			l->list[l->count].button=API_CreateButtonFather(128-strlen(ent->d_name)*4, 32+20*l->count, RGB15(31,31,31), function, father, ent->d_name, "button.pcx", false);
+			l->count++;
 		}
 		closedir(dir);
 	}
 }
-
 void setupButtons(filelist_struct* l, u16 index)
 {
 	int i;
