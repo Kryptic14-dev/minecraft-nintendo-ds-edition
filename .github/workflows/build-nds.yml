@@ -1,0 +1,29 @@
+name: Build Nintendo DS ROM
+
+on:
+  push:
+    branches:
+      - new-world-system
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
+    steps:
+      - name: Install Nintendo DS development libraries
+        run: |
+          dkp-pacman -Sy --noconfirm
+          dkp-pacman -S --noconfirm nds-dev
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Build ROM
+        run: make
+      - name: Upload .nds ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: minecraft-nintendo-ds-edition-nds
+          path: "*.nds"
+          if-no-files-found: error
+          retention-days: 14
