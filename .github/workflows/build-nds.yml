@@ -19,10 +19,9 @@ jobs:
         run: |
           set -euxo pipefail
           CONF=/opt/devkitpro/pacman/etc/pacman.conf
-          # Use the current package repository layout. Some versions of the
-          # container ship with the dkp-libs Server set to the package root,
-          # which makes pacman request database files from the wrong path.
-          sed -i '/^\[dkp-libs\]/,/^\[/ s#^Server = .*#Server = https://pkg.devkitpro.org/packages/$repo/$arch#' "$CONF"
+          # devkitPro's dkp-libs database is hosted at the packages root.
+          # Do not append $repo/$arch here: that path returns 404.
+          sed -i '/^\[dkp-libs\]/,/^\[/ s#^Server = .*#Server = https://pkg.devkitpro.org/packages#' "$CONF"
           sed -i '/^\[dkp-linux\]/,/^\[/ s#^Server = .*#Server = https://pkg.devkitpro.org/packages/linux/$arch#' "$CONF"
           cat "$CONF"
           dkp-pacman -Sy --noconfirm
